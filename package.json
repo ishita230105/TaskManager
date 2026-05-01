@@ -2,7 +2,8 @@
   "name": "team-task-manager",
   "version": "1.0.0",
   "scripts": {
-    "build": "npm run build --prefix frontend && npm run build --prefix backend",
-    "start": "npm start --prefix backend"
-  }
+  "install-all": "npm install && npm install --prefix frontend && npm install --prefix backend",
+  "build": "npm run install-all && npm run build --prefix frontend && npm run build --prefix backend",
+  "start": "npm start --prefix backend"
+}
 }
