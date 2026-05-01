@@ -81,7 +81,7 @@ router.patch('/:id/status', async (req: AuthRequest, res: Response) => {
     const data = updateTaskStatusSchema.parse(req.body);
     const taskId = req.params.id;
 
-    const task = await prisma.task.findUnique({ where: { id: taskId } });
+    const task = await prisma.task.findUnique({ where: { id: taskId as string } });
     if (!task) {
       res.status(404).json({ error: 'Task not found' });
       return;
@@ -93,7 +93,7 @@ router.patch('/:id/status', async (req: AuthRequest, res: Response) => {
     }
 
     const updatedTask = await prisma.task.update({
-      where: { id: taskId },
+      where: { id: taskId as string },
       data: { status: data.status },
     });
     
@@ -106,7 +106,7 @@ router.patch('/:id/status', async (req: AuthRequest, res: Response) => {
 // Delete task (Admin only)
 router.delete('/:id', requireAdmin, async (req: AuthRequest, res: Response) => {
   try {
-    await prisma.task.delete({ where: { id: req.params.id } });
+    await prisma.task.delete({ where: { id: req.params.id as string } });
     res.status(204).send();
   } catch (error) {
     res.status(400).json({ error: 'Failed to delete task' });

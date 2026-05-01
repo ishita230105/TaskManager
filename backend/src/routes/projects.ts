@@ -49,7 +49,7 @@ router.get('/', async (req: AuthRequest, res: Response) => {
 // Get single project
 router.get('/:id', async (req: AuthRequest, res: Response) => {
   const project = await prisma.project.findUnique({
-    where: { id: req.params.id },
+    where: { id: req.params.id as string },
     include: {
       owner: { select: { id: true, name: true } },
       tasks: {
@@ -67,7 +67,7 @@ router.get('/:id', async (req: AuthRequest, res: Response) => {
 // Delete project (Admin only)
 router.delete('/:id', requireAdmin, async (req: AuthRequest, res: Response) => {
   try {
-    await prisma.project.delete({ where: { id: req.params.id } });
+    await prisma.project.delete({ where: { id: req.params.id as string } });
     res.status(204).send();
   } catch (error) {
     res.status(400).json({ error: 'Failed to delete project' });

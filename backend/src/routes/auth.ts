@@ -58,7 +58,7 @@ router.post('/register', registerLimiter, async (req: Request, res: Response) =>
     res.status(201).json({ user: { id: user.id, name: user.name, email: user.email, role: user.role }, token });
   } catch (error) {
     if (error instanceof z.ZodError) {
-      res.status(400).json({ error: error.errors[0].message });
+      res.status(400).json({ error: error.issues[0].message });
     } else {
       res.status(500).json({ error: 'Internal server error' });
     }
@@ -91,7 +91,7 @@ router.post('/login', loginLimiter, async (req: Request, res: Response) => {
     res.json({ user: { id: user.id, name: user.name, email: user.email, role: user.role }, token });
   } catch (error) {
     if (error instanceof z.ZodError) {
-      res.status(400).json({ error: error.errors[0].message });
+      res.status(400).json({ error: error.issues[0].message });
     } else {
       res.status(500).json({ error: 'Internal server error' });
     }
