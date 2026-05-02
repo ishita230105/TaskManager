@@ -5,7 +5,7 @@ import path from 'path';
 import authRoutes from './routes/auth';
 import projectRoutes from './routes/projects';
 import taskRoutes from './routes/tasks';
-import prisma from './prisma';
+import { getDashboardStats } from './controllers/dashboard';
 
 dotenv.config();
 
@@ -20,41 +20,7 @@ app.use('/api/projects', projectRoutes);
 app.use('/api/tasks', taskRoutes);
 
 // Dashboard stats route
-app.get('/api/dashboard', async (req, res) => {
-  try {
-    const totalProjects = await prisma.project.count();
-    const totalTasks = await prisma.task.count();
-    const tasksByStatus = await prisma.task.groupBy({
-      by: ['status'],
-      _count: true,
-    });
-
-    const recentActiveTasks = await prisma.task.findMany({
-      where: {
-        status: { in: ['TODO', 'IN_PROGRESS'] }
-      },
-      include: { project: { select: { name: true } } },
-      orderBy: { createdAt: 'desc' },
-      take: 5
-    });
-    const overdueTasksCount = await prisma.task.count({
-      where: {
-        dueDate: { lt: new Date() },
-        status: { not: 'DONE' }
-      }
-    });
-    
-    res.json({
-      totalProjects,
-      totalTasks,
-      tasksByStatus,
-      recentActiveTasks,
-      overdueTasksCount
-    });
-  } catch (error) {
-    res.status(500).json({ error: 'Failed to fetch dashboard data' });
-  }
-});
+app.get('/api/dashboard', getDashboardStats);
 
 app.get('/health', (req, res) => {
   res.send('API is running...');
@@ -68,6 +34,12 @@ if (process.env.NODE_ENV === 'production') {
     res.sendFile(path.join(__dirname, '../../frontend/dist/index.html'));
   });
 }
+
+// Global Error Handler
+app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
+  console.error('[Error]', err.message || err);
+  res.status(err.status || 500).json({ error: err.message || 'Internal server error' });
+});
 
 app.listen(Number(PORT), '0.0.0.0', () => {
   console.log(`Server running on port ${PORT}`);
