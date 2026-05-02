@@ -25,7 +25,7 @@ const DashboardLayout = () => {
       <aside className="glass" style={{ width: '250px', display: 'flex', flexDirection: 'column', borderRight: '1px solid var(--border)' }}>
         <div style={{ padding: '1.5rem', borderBottom: '1px solid var(--border)' }}>
           <h2 style={{ fontSize: '1.5rem', margin: 0, color: 'var(--primary)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <CheckSquare /> Taskify
+            <CheckSquare /> Task Manager
           </h2>
         </div>
         

@@ -63,17 +63,18 @@ const Dashboard = () => {
           </div>
         </div>
 
-        {/* Overdue Tasks Card */}
+        {/* Pending Tasks Card */}
         <div 
-          className="glass-card stat-card stat-card-overdue" 
-          onClick={() => document.getElementById('overdue-tasks-section')?.scrollIntoView({ behavior: 'smooth' })}
+          className="glass-card stat-card-static"
         >
-          <div className="stat-icon stat-icon-danger">
-            <Calendar size={32} />
+          <div className="stat-icon stat-icon-warning">
+            <Activity size={32} />
           </div>
           <div>
-            <div className="stat-value stat-value-danger">{stats?.overdueTasks?.length || 0}</div>
-            <div className="stat-label">Overdue Tasks</div>
+            <div className="stat-value text-warning">
+              {getStatusCount('TODO') + getStatusCount('IN_PROGRESS')}
+            </div>
+            <div className="stat-label">Pending Tasks</div>
           </div>
         </div>
       </div>
