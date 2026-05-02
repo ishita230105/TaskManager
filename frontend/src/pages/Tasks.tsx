@@ -27,10 +27,11 @@ const Tasks = () => {
         api.get('/tasks'),
         api.get('/projects')
       ]);
-      setTasks(tasksRes.data);
-      setProjects(projectsRes.data);
-      if (projectsRes.data.length > 0) {
-        setProjectId(projectsRes.data[0].id);
+      setTasks(tasksRes.data.data || tasksRes.data);
+      const projectsData = projectsRes.data.data || projectsRes.data;
+      setProjects(projectsData);
+      if (projectsData.length > 0) {
+        setProjectId(projectsData[0].id);
       }
     } catch (error) {
       console.error('Failed to fetch data', error);
@@ -60,8 +61,7 @@ const Tasks = () => {
         title,
         description,
         dueDate: dueDate || undefined,
-        projectId,
-        assigneeId: user?.id // By default assigning to self for demo
+        projectId
       });
       setShowModal(false);
       setTitle('');
@@ -164,6 +164,9 @@ const Tasks = () => {
                     <Calendar size={14} />
                     {format(new Date(task.dueDate), 'MMM d, yyyy')}
                   </span>
+                )}
+                {task.assignee && (
+                  <span>Assignee: <strong style={{ color: 'var(--text-main)' }}>{task.assignee.name}</strong></span>
                 )}
               </div>
             </div>

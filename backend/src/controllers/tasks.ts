@@ -4,18 +4,41 @@ import prisma from '../prisma';
 import { AuthRequest } from '../middleware/auth';
 import { createTaskSchema, updateTaskStatusSchema } from '../schemas';
 
+import { suggestTaskDetails } from '../services/ai';
+
 export const createTask = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
     const data = createTaskSchema.parse(req.body);
+
+    let finalDueDate = data.dueDate ? new Date(data.dueDate) : null;
+    let finalAssigneeId = data.assigneeId;
+
+    // AI Agentic Workflow: If dueDate or assignee is missing, use AI to triage
+    if (!finalDueDate || !finalAssigneeId) {
+      const project = await prisma.project.findUnique({
+        where: { id: data.projectId },
+        include: { members: { include: { user: { select: { id: true, name: true } } } } }
+      });
+      
+      if (project) {
+        const aiSuggestion = await suggestTaskDetails(data.title, data.description, project.members);
+        if (aiSuggestion) {
+          if (!finalDueDate && aiSuggestion.dueDate) finalDueDate = new Date(aiSuggestion.dueDate);
+          if (!finalAssigneeId && aiSuggestion.suggestedAssigneeId && aiSuggestion.suggestedAssigneeId !== 'null') {
+             finalAssigneeId = aiSuggestion.suggestedAssigneeId;
+          }
+        }
+      }
+    }
 
     // Let Prisma's foreign key constraints handle missing projectId or assigneeId
     const task = await prisma.task.create({
       data: {
         title: data.title,
         description: data.description,
-        dueDate: data.dueDate ? new Date(data.dueDate) : null,
+        dueDate: finalDueDate,
         projectId: data.projectId,
-        assigneeId: data.assigneeId,
+        assigneeId: finalAssigneeId,
       },
     });
     res.status(201).json(task);
@@ -37,17 +60,31 @@ export const getTasks = async (req: AuthRequest, res: Response, next: NextFuncti
     const limit = parseInt(req.query.limit as string) || 10;
     const skip = (page - 1) * limit;
 
-    const tasks = await prisma.task.findMany({
-        where: whereClause,
-        skip,
-        take: limit,
-        include: {
-        project: { select: { id: true, name: true } },
-        assignee: { select: { id: true, name: true } },
-        },
-        orderBy: { createdAt: 'desc' }
+    const [tasks, total] = await Promise.all([
+      prisma.task.findMany({
+          where: whereClause,
+          skip,
+          take: limit,
+          include: {
+          project: { select: { id: true, name: true } },
+          assignee: { select: { id: true, name: true } },
+          },
+          orderBy: { createdAt: 'desc' }
+      }),
+      prisma.task.count({ where: whereClause })
+    ]);
+    
+    res.json({
+      data: tasks,
+      meta: {
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit),
+        hasNextPage: page * limit < total,
+        hasPrevPage: page > 1
+      }
     });
-    res.json(tasks);
   } catch (error) {
     next(error);
   }

@@ -20,7 +20,7 @@ const Projects = () => {
   const fetchProjects = async () => {
     try {
       const response = await api.get('/projects');
-      setProjects(response.data);
+      setProjects(response.data.data || response.data);
     } catch (error) {
       console.error('Failed to fetch projects', error);
     } finally {

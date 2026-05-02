@@ -32,17 +32,31 @@ export const getProjects = async (req: AuthRequest, res: Response, next: NextFun
     const limit = parseInt(req.query.limit as string) || 10;
     const skip = (page - 1) * limit;
 
-    const projects = await prisma.project.findMany({
-      skip,
-      take: limit,
-      include: {
-        owner: { select: { id: true, name: true, email: true } },
-        members: { select: { role: true, user: { select: { name: true, email: true } } } },
-        _count: { select: { tasks: true } },
-      },
-      orderBy: { createdAt: 'desc' }
+    const [projects, total] = await Promise.all([
+      prisma.project.findMany({
+        skip,
+        take: limit,
+        include: {
+          owner: { select: { id: true, name: true, email: true } },
+          members: { select: { role: true, user: { select: { name: true, email: true } } } },
+          _count: { select: { tasks: true } },
+        },
+        orderBy: { createdAt: 'desc' }
+      }),
+      prisma.project.count()
+    ]);
+    
+    res.json({
+      data: projects,
+      meta: {
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit),
+        hasNextPage: page * limit < total,
+        hasPrevPage: page > 1
+      }
     });
-    res.json(projects);
   } catch (error) {
       next(error);
   }
