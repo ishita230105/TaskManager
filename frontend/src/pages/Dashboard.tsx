@@ -63,29 +63,19 @@ const Dashboard = () => {
           </div>
         </div>
 
-        {/* Active Tasks Card */}
-        <div className="glass-card stat-card-static">
-          <div className="stat-icon stat-icon-warning">
-            <Activity size={32} />
+        {/* Overdue Tasks Card */}
+        <div 
+          className="glass-card stat-card stat-card-overdue" 
+          onClick={() => document.getElementById('overdue-tasks-section')?.scrollIntoView({ behavior: 'smooth' })}
+        >
+          <div className="stat-icon stat-icon-danger">
+            <Calendar size={32} />
           </div>
           <div>
-            <div className="stat-value">{getStatusCount('IN_PROGRESS')}</div>
-            <div className="stat-label">In Progress</div>
+            <div className="stat-value stat-value-danger">{stats?.overdueTasks?.length || 0}</div>
+            <div className="stat-label">Overdue Tasks</div>
           </div>
         </div>
-
-        {/* Overdue Tasks Card */}
-        {stats?.overdueTasksCount > 0 && (
-          <div className="glass-card stat-card stat-card-overdue" onClick={() => navigate('/tasks')}>
-            <div className="stat-icon stat-icon-danger">
-              <Calendar size={32} />
-            </div>
-            <div>
-              <div className="stat-value stat-value-danger">{stats.overdueTasksCount}</div>
-              <div className="stat-label">Overdue Tasks</div>
-            </div>
-          </div>
-        )}
       </div>
 
       <div className="glass-card">
@@ -106,10 +96,40 @@ const Dashboard = () => {
         </div>
       </div>
 
+      {/* Overdue Tasks List */}
+      {stats?.overdueTasks && stats.overdueTasks.length > 0 && (
+        <div id="overdue-tasks-section" className="glass-card" style={{ marginTop: '2rem', borderColor: 'rgba(239, 68, 68, 0.3)' }}>
+          <div className="flex justify-between items-center" style={{ marginBottom: '1.5rem' }}>
+            <h3 style={{ color: 'var(--danger)' }}>⚠️ Overdue Tasks</h3>
+          </div>
+          
+          <div className="task-list">
+            {stats.overdueTasks.map((task: any) => (
+              <div key={`overdue-${task.id}`} className="task-item" style={{ borderLeft: '4px solid var(--danger)' }}>
+                <div>
+                  <h4 className="task-item-title">
+                    {task.title}
+                  </h4>
+                  <div className="task-item-project">
+                    Project: {task.project.name}
+                  </div>
+                </div>
+                {task.dueDate && (
+                  <div className="task-item-date" style={{ color: 'var(--danger)' }}>
+                    <Calendar size={14} />
+                    {format(new Date(task.dueDate), 'MMM d, yyyy')}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Recent Active Tasks List */}
       <div className="glass-card" style={{ marginTop: '2rem' }}>
         <div className="flex justify-between items-center" style={{ marginBottom: '1.5rem' }}>
-          <h3>Pending & In Progress Tasks</h3>
+          <h3>Recent Active Tasks</h3>
           <button className="btn btn-outline" onClick={() => navigate('/tasks')} style={{ padding: '0.5rem 1rem', fontSize: '0.875rem' }}>
             View All Tasks
           </button>
