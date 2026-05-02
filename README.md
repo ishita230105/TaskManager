@@ -1,4 +1,4 @@
-# Team Task Manager (Ethara.ai Production Edition)
+# Task Manager
 
 A high-concurrency, strictly-typed team task management system built for high-stakes AI and Engineering teams. This repository demonstrates production-grade backend architecture, an agentic AI workflow for task triage, and uncompromising security.
 
