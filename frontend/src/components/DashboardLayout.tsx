@@ -1,7 +1,7 @@
 import React from 'react';
 import { Outlet, Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { LayoutDashboard, FolderKanban, CheckSquare, LogOut } from 'lucide-react';
+import { LayoutDashboard, FolderKanban, CheckSquare, LogOut, Users } from 'lucide-react';
 
 const DashboardLayout = () => {
   const { user, logout } = useAuth();
@@ -16,6 +16,7 @@ const DashboardLayout = () => {
   const navItems = [
     { path: '/', label: 'Dashboard', icon: <LayoutDashboard size={20} /> },
     { path: '/projects', label: 'Projects', icon: <FolderKanban size={20} /> },
+    { path: '/team', label: 'Team', icon: <Users size={20} /> },
     { path: '/tasks', label: 'Tasks', icon: <CheckSquare size={20} /> },
   ];
 

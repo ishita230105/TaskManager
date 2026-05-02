@@ -15,18 +15,20 @@ export const createTask = async (req: AuthRequest, res: Response, next: NextFunc
 
     // AI Agentic Workflow: If dueDate or assignee is missing, use AI to triage
     if (!finalDueDate || !finalAssigneeId) {
-      const project = await prisma.project.findUnique({
-        where: { id: data.projectId },
-        include: { members: { include: { user: { select: { id: true, name: true } } } } }
+      // Only assign tasks to users who have the 'MEMBER' role
+      const companyMembers = await prisma.user.findMany({
+        where: { role: 'MEMBER' },
+        select: { id: true, name: true }
       });
       
-      if (project) {
-        const aiSuggestion = await suggestTaskDetails(data.title, data.description, project.members);
+      // Map it to the expected structure for the AI service
+      const mappedMembers = companyMembers.map(m => ({ user: m }));
+      
+      const aiSuggestion = await suggestTaskDetails(data.title, data.description, mappedMembers);
         if (aiSuggestion) {
-          if (!finalDueDate && aiSuggestion.dueDate) finalDueDate = new Date(aiSuggestion.dueDate);
-          if (!finalAssigneeId && aiSuggestion.suggestedAssigneeId && aiSuggestion.suggestedAssigneeId !== 'null') {
-             finalAssigneeId = aiSuggestion.suggestedAssigneeId;
-          }
+        if (!finalDueDate && aiSuggestion.dueDate) finalDueDate = new Date(aiSuggestion.dueDate);
+        if (!finalAssigneeId && aiSuggestion.suggestedAssigneeId && aiSuggestion.suggestedAssigneeId !== 'null') {
+           finalAssigneeId = aiSuggestion.suggestedAssigneeId;
         }
       }
     }

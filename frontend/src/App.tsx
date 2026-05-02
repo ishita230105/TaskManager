@@ -9,6 +9,7 @@ import ResetPassword from './pages/ResetPassword';
 import DashboardLayout from './components/DashboardLayout';
 import Dashboard from './pages/Dashboard';
 import Projects from './pages/Projects';
+import Team from './pages/Team';
 import Tasks from './pages/Tasks';
 import { Toaster } from 'react-hot-toast';
 import { ErrorBoundary } from './components/ErrorBoundary';
@@ -25,6 +26,7 @@ const AppContent = () => {
         <Route element={<DashboardLayout />}>
           <Route path="/" element={<Dashboard />} />
           <Route path="/projects" element={<Projects />} />
+          <Route path="/team" element={<Team />} />
           <Route path="/tasks" element={<Tasks />} />
         </Route>
       </Route>
