@@ -14,6 +14,7 @@ A high-concurrency, strictly-typed team task management system built to solve cr
 I built this system to handle real-world scaling constraints, focusing on strict data integrity and event-loop optimization.
 
 *   **Concurrent Execution (`Promise.all`):** The `/api/dashboard` endpoint aggregates data across 5 distinct database models. Instead of sequential `await` waterfalls that block the Node.js event loop, I execute these concurrently, reducing dashboard latency by ~60%.
+*   **Automated Overdue Detection:** Built a reactive dashboard query that automatically flags tasks past their due date that haven't been marked `DONE`, sorting them by urgency (`asc`).
 *   **Strict MVC Decoupling:** Routing (`routes/`), business logic (`controllers/`), and payload validation (`schemas/`) are strictly separated. 
 *   **Database-Level Referential Integrity:** Rather than building inefficient application-side `findUnique` checks, the system relies on native `@@unique([userId, projectId])` constraints and `onDelete: Cascade` rules in Prisma to prevent race conditions and orphaned records.
 *   **Type-Safe Edges:** Integrated `zod` for strict runtime payload validation, catching malformed requests before they ever hit the controller layer. Errors are bubbled up via `next(error)` to a centralized Express error-handling middleware.

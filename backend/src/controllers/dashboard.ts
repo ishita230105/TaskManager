@@ -8,7 +8,7 @@ export const getDashboardStats = async (req: Request, res: Response, next: NextF
       totalTasks,
       tasksByStatus,
       recentActiveTasks,
-      overdueTasksCount
+      overdueTasks
     ] = await Promise.all([
       prisma.project.count(),
       prisma.task.count(),
@@ -24,11 +24,14 @@ export const getDashboardStats = async (req: Request, res: Response, next: NextF
         orderBy: { createdAt: 'desc' },
         take: 5
       }),
-      prisma.task.count({
+      prisma.task.findMany({
         where: {
           dueDate: { lt: new Date() },
           status: { not: 'DONE' }
-        }
+        },
+        include: { project: { select: { name: true } } },
+        orderBy: { dueDate: 'asc' },
+        take: 5
       })
     ]);
     
@@ -37,7 +40,7 @@ export const getDashboardStats = async (req: Request, res: Response, next: NextF
       totalTasks,
       tasksByStatus,
       recentActiveTasks,
-      overdueTasksCount
+      overdueTasks
     });
   } catch (error) {
     next(error);
